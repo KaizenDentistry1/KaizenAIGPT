@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaizen AI - Chat Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 60%;
+            background-color: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        .chat-header {
+            padding: 20px;
+            background-color: #333;
+            text-align: center;
+            font-size: 24px;
+            color: white;
+        }
+        .chat-box {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message.user {
+            text-align: right;
+        }
+        .message.gpt {
+            text-align: left;
+        }
+        .message p {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 10px;
+            max-width: 60%;
+        }
+        .message.user p {
+            background-color: #4caf50;
+            color: white;
+        }
+        .message.gpt p {
+            background-color: #444;
+            color: white;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #333;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        .chat-input button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">Kaizen AI - ChatGPT Interface</div>
+        <div id="chatBox" class="chat-box"></div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="getGPTResponse()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+
+        async function getGPTResponse() {
+            const userInput = document.getElementById('userInput').value;
+            if (!userInput) return;
+
+            addMessageToChat('user', userInput); // Add user message to chat box
+
+            document.getElementById('userInput').value = '';  // Clear input field
+
+            const apiKey = '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';  // Replace with your actual OpenAI API key
+            
+            try {
+                const response = await axios.post('https://api.openai.com/v1/completions', {
+                    model: 'gpt-4',  // Using GPT-4
+                    prompt: userInput,
+                    max_tokens: 150
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const gptResponse = response.data.choices[0].text.trim();
+                addMessageToChat('gpt', gptResponse); // Add GPT response to chat box
+            } catch (error) {
+                addMessageToChat('gpt', 'Error: ' + error.message);  // Display error message
+            }
+        }
+
+        // Function to add messages to the chat box
+        function addMessageToChat(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.innerHTML = `<p>${message}</p>`;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the bottom
+        }
+    </script>
+
+</body>
+</html>
